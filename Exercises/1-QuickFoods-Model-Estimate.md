@@ -118,33 +118,26 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 
-
 DATA_PATH = "data/delivery_times.csv"
 MODEL_DIR = "models"
 MODEL_PATH = os.path.join(MODEL_DIR, "delivery_time_model.pkl")
-
 
 def load_data(path: str) -> pd.DataFrame:
     if not os.path.exists(path):
         raise FileNotFoundError(f"Dataset not found at: {path}")
     return pd.read_csv(path)
 
-
 def train_model(df: pd.DataFrame) -> dict:
-    # Features and target
     X = df[["distance_km", "items_count", "is_peak_hour", "traffic_level"]]
     y = df["delivery_time_min"]
 
-    # Split data
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42
     )
 
-    # Baseline model
     model = LinearRegression()
     model.fit(X_train, y_train)
 
-    # Evaluate
     preds = model.predict(X_test)
     mae = mean_absolute_error(y_test, preds)
     mse = mean_squared_error(y_test, preds)
@@ -156,30 +149,27 @@ def train_model(df: pd.DataFrame) -> dict:
         "test_size": len(X_test),
     }
 
-
-def save_model(model) -> None:
+def save_model(model):
     os.makedirs(MODEL_DIR, exist_ok=True)
     joblib.dump(model, MODEL_PATH)
 
-
 def main():
-    print("=== QuickFoods MLOps Lab 1: Training Baseline Model ===")
-    df = load_data(DATA_PATH)
+    print("=== QuickFoods MLOps Lab 1: Baseline Training ===")
 
+    df = load_data(DATA_PATH)
     result = train_model(df)
-    model = result["model"]
 
     print(f"Test samples: {result['test_size']}")
     print(f"MAE (minutes): {result['mae']:.2f}")
     print(f"MSE: {result['mse']:.2f}")
 
-    save_model(model)
+    save_model(result["model"])
     print(f"Model saved to: {MODEL_PATH}")
-    print("✅ Done. You have produced a reproducible ML artifact.")
-
+    print("Done. Reproducible ML artifact created.")
 
 if __name__ == "__main__":
     main()
+
 ```
 
 Run
@@ -197,6 +187,18 @@ Model saved to: models/delivery_time_model.pkl
 Done. You have produced a reproducible ML artifact.
 ```
 
+## What we learnt
+- Built a clean ML repository
+- Created a repeatable training pipeline
+- Produced a versionable ML artifact
+
+## Key Questions and Answers
+Q: What is a Model Artifact?
+A: It's output of a training process can be loaded and used for interference without retraining
+
+Q: Why is the training done using a Python script instead of a notebook?
+Use of Scripts or code make it: Automatable and CI/CD friendly
+Notebooks are good for exploration, but scripts are better for production pipeline
 
 
 
